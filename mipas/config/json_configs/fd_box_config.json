@@ -1,0 +1,13 @@
+{
+    "input_folder": "",
+    "box_sizes": [2, 4, 8, 16, 32],
+    "binarize": true,
+    "threshold": 128,
+    "title_size": 24,
+    "axis_label_size": 22,
+    "tick_label_size": 20,
+    "legend_size": 18,
+    "dpi_setting": 300,
+    "plot_figsize": [8, 6],
+    "max_retries": 3
+}

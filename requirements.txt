@@ -1,0 +1,7 @@
+PIL
+matplotlib
+matplotlib.pyplot
+numpy
+scipy.ndimage
+skimage.measure
+PySide2

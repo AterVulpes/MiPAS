@@ -1,0 +1,18 @@
+{
+  "input_folder": "",
+  "title_size": 24,
+  "axis_label_size": 22,
+  "tick_label_size": 20,
+  "legend_size": 18,
+  "dpi_setting": 300,
+  "plot_figsize": [16, 8],
+  "segmentation_number": [5, 25, 75],
+  "segmentation_method": "adaptive",
+  "segmentation_title_size": 24,
+  "segmentation_tick_size": 22,
+  "segmentation_cbar_text_size": 20,
+  "segmentation_vmin": 0,
+  "bit_depth": null,
+  "max_retries": 3,
+  "plot": false
+}

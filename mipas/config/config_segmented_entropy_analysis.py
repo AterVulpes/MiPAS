@@ -1,0 +1,103 @@
+CONFIG = {
+    "input_folder": {
+        "type": "path",
+        "default": "",
+        "label": "Input Folder",
+        "hint": "Select the folder containing input images for segmented entropy analysis.",
+        "validate": lambda x: isinstance(x, str),
+    },
+    "segmentation_number": {
+        "type": "list",
+        "default": [2, 4, 8, 16],
+        "label": "Segmentation Numbers",
+        "hint": "List of segment counts (e.g., [2, 4, 8, 16]) to divide the image into smaller regions for entropy calculation.",
+        "validate": lambda x: isinstance(x, list) and all(isinstance(n, int) and n > 0 for n in x),
+    },
+    "segmentation_method": {
+        "type": "str",
+        "default": "merge",
+        "label": "Segmentation Method",
+        "hint": "Segmentation approach:\n"
+                "  - 'crop': Drop incomplete segments\n"
+                "  - 'merge': Merge remainder pixels\n"
+                "  - 'adaptive': Resize to fit image exactly",
+        "validate": lambda x: x in {"crop", "merge", "adaptive"},
+    },
+    "segmentation_cbar_text_size": {
+        "type": "int",
+        "default": 20,
+        "label": "Colorbar Text Size",
+        "hint": "Font size for colorbar labels.",
+        "validate": lambda x: isinstance(x, int) and x > 0,
+    },
+    "segmentation_vmin": {
+        "type": "int",
+        "default": 0,
+        "label": "Minimum Color Scale (vmin)",
+        "hint": "Lower limit of the entropy heatmap color scale.",
+        "validate": lambda x: isinstance(x, int) and x >= 0,
+    },
+    "segmentation_vmax": {
+        "type": "int",
+        "default": 8,
+        "label": "Maximum Color Scale (vmax)",
+        "hint": "Upper limit of the entropy heatmap color scale (usually matches bit depth).",
+        "validate": lambda x: isinstance(x, int) and x >= 0,
+    },
+    "title_size": {
+        "type": "int",
+        "default": 24,
+        "label": "Plot Title Font Size",
+        "hint": "Font size for plot titles.",
+        "validate": lambda x: isinstance(x, int) and x > 0,
+    },
+    "axis_label_size": {
+        "type": "int",
+        "default": 22,
+        "label": "Axis Label Font Size",
+        "hint": "Font size for axis labels.",
+        "validate": lambda x: isinstance(x, int) and x > 0,
+    },
+    "tick_label_size": {
+        "type": "int",
+        "default": 20,
+        "label": "Tick Label Font Size",
+        "hint": "Font size for tick labels on axes.",
+        "validate": lambda x: isinstance(x, int) and x > 0,
+    },
+    "legend_size": {
+        "type": "int",
+        "default": 18,
+        "label": "Legend Font Size",
+        "hint": "Font size for the plot legend.",
+        "validate": lambda x: isinstance(x, int) and x > 0,
+    },
+    "dpi_setting": {
+        "type": "int",
+        "default": 300,
+        "label": "Plot DPI Setting",
+        "hint": "Resolution of saved plots (dots per inch).",
+        "validate": lambda x: isinstance(x, int) and x >= 72,
+    },
+    "plot_figsize": {
+        "type": "list",
+        "default": [16, 8],
+        "label": "Plot Figure Size",
+        "hint": "Size of the plot in inches: [width, height].",
+        "validate": lambda x: isinstance(x, (list, tuple)) and len(x) == 2 and all(isinstance(i, (int, float)) and i > 0 for i in x),
+    },
+    "max_retries": {
+        "type": "int",
+        "default": 3,
+        "label": "Max Retries on Failure",
+        "hint": "Maximum retry attempts if an error occurs.",
+        "validate": lambda x: isinstance(x, int) and x >= 0,
+    },
+    "plot": {
+        "type": "bool",
+        "default": True,
+        "label": "Generate Plots",
+        "hint": "If checked, visual figures will be generated and saved. Unchecked = CSV only.",
+        "validate": lambda x: isinstance(x, bool),
+    },
+}
