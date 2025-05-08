@@ -11,6 +11,45 @@ from mipas.config.configuration_manager import ConfigurationManager
 
 logger = logging.getLogger(__name__)
 
+class ImageConverter:
+    """Converts image files (e.g., .tif, .png) to .npy format and ensures they are grayscale."""
+
+    def __init__(self, image_path: Path):
+        """
+        Args:
+            image_path (Path): Path to the image file.
+        """
+        self.image_path = image_path
+        self.bit_depth = None
+
+    def convert_to_npy(self) -> np.ndarray:
+        """
+        Converts the image to a numpy array and ensures it's grayscale.
+        Determines its bit depth based on the image array's data type.
+
+        Returns:
+            np.ndarray: The image data in numpy array format.
+
+        Raises:
+            FileNotFoundError: If the image file is not found.
+            IOError: If there is an issue reading the image file.
+        """
+        try:
+            img = Image.open(self.image_path)
+            # Ensure grayscale conversion for SEM images, as they are inherently grayscale.
+            if img.mode not in ["L", "I;16"]:
+                img = img.convert("L")  # Convert to grayscale to prevent color skew in entropy
+
+            img_array = np.array(img)
+            self.bit_depth = img_array.dtype.itemsize * 8  # Determine bit depth based on dtype
+            logger.info(f"Image converted to numpy array with bit depth: {self.bit_depth} for {self.image_path}")
+            return img_array
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {self.image_path} - {str(e)}")
+            raise
+        except IOError as e:
+            logger.error(f"IO error while reading image {self.image_path}: {str(e)}")
+            raise
 
 class BoxFDConfigurationManager(ConfigurationManager):
     def __init__(self, config: Dict[str, Any], input_file: Path, input_folder: Path, analysis_type: str):

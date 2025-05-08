@@ -188,7 +188,7 @@ class MiPASLauncher(QWidget):
     def run_selected_analyses(self):
         selected = [key for key, val in self.state["selected_analyses"].items() if val]
         if not selected:
-            self.status_log.append("⚠️ Please select at least one analysis type.")
+            self.status_log.append("Please select at least one analysis type.")
             logger.warning("No analysis selected.")
             return
 
@@ -206,7 +206,7 @@ class MiPASLauncher(QWidget):
                 break
 
         if missing_folder:
-            self.status_log.append("⚠️ Please select a valid input folder.")
+            self.status_log.append("Please select a valid input folder.")
             logger.warning("Missing or invalid input folder.")
             return
 
@@ -217,10 +217,10 @@ class MiPASLauncher(QWidget):
             config = self.state["configs"][key]
             try:
                 run_analysis(config=config, analysis_type=key, num_workers=-1)
-                self.status_log.append(f"✅ {key} completed.")
+                self.status_log.append(f"{key} completed.")
                 logger.info(f"{key} analysis completed.")
             except Exception as e:
-                self.status_log.append(f"❌ {key} failed: {e}")
+                self.status_log.append(f"{key} failed: {e}")
                 logger.exception(f"{key} failed.")
 
         self.status_log.append("All selected analyses finished.")

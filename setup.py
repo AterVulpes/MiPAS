@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="mipas",
-    version="1.0.1",
+    version="1.0.2",
     packages=find_packages(include=["mipas", "mipas.*"]),
     install_requires=[
         "numpy",
@@ -11,7 +11,7 @@ setup(
         "matplotlib",
         "scikit-image"
     ],
-    python_requires=">=3.7",
+    python_requires="=3.10.5",
     entry_points={
         "console_scripts": [
             "mipas-gui = mipas.gui.gui_launcher:main",

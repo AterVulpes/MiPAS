@@ -18,7 +18,7 @@ from mipas.logging_config import setup_main_logger
 from mipas.gui.gui_main import MiPASLauncher
 
 
-def show_splash_screen(app, duration=2.0):
+def show_splash_screen(app, duration=1.0):
     splash = QLabel()
     splash.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
     splash.setAttribute(Qt.WA_TranslucentBackground)
@@ -48,11 +48,12 @@ def main():
     logger.info("Starting MiPAS...")
 
     try:
-        app = QApplication(sys.argv)  # <-- create app ONCE
+        app = QApplication(sys.argv)
 
-        show_splash_screen(app, duration=2.0)  # <-- pass app in
+        show_splash_screen(app, duration=2.0)
 
-        window = MiPASLauncher()  # <-- launch main window
+        # launch main window
+        window = MiPASLauncher()
         window.show()
 
         sys.exit(app.exec_())
