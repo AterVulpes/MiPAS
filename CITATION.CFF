@@ -1,12 +1,11 @@
 cff-version: 1.2.0
 message: "If you use MiPAS in your research, please cite this work."
 title: "Entropy Gradients Correlate with Failure in High-Entropy Alloy Films: A Pilot Analysis Enabled by the MiPAS Toolkit"
-authors:
-  - family-names: [Your Last Name]
-    given-names: [Your First Name(s)]
-    affiliation: [Your Institution]
-    orcid: https://orcid.org/XXXX-XXXX-XXXX-XXXX
-version: 1.0.1
+
+WIP
+
+    orcid: https://orcid.org/0000-0001-5962-6700
+version: 1.0.2
 doi: 10.5281/zenodo.1234567  # (if available via Zenodo or other archive)
 date-released: 2025-05-05
 repository-code: https://github.com/yourusername/mipas
