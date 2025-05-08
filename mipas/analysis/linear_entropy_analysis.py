@@ -29,23 +29,16 @@ logger = logging.getLogger(__name__)
 class LSEAConfigurationManager(ConfigurationManager):
     def __init__(self, config: Dict[str, Any], input_file: Path, input_folder: Path, analysis_type: str):
         try:
-            # Set output folder explicitly before calling base constructor
             config = config.copy()
             parent_folder = input_folder.parent
-            config["output_folder"] = config.get("output_folder") or str(parent_folder / f"{analysis_type}_results_{input_folder.name}")
+            config["output_folder"] = config.get("output_folder") or str(
+                parent_folder / f"{analysis_type}_results_{input_folder.name}"
+            )
 
             super().__init__(config, input_file, input_folder, analysis_type)
 
-            # Get validated config values
+            # Only config parsing, no I/O
             self.sliding_window_entropy_percent = self.cfg["sliding_window_entropy_percent"]
-            # Load and convert the image
-            image_converter = ImageConverter(input_file)
-            self.image = image_converter.convert_to_npy()
-            # Use detected bit depth
-            self.bit_depth = image_converter.bit_depth
-            self.cfg.data["bit_depth"] = self.bit_depth
-
-            # Required for GUI & plot logic
             self.generate_plots = self.cfg["plot"]
             self.plot_figsize = self.cfg["plot_figsize"]
             self.title_size = self.cfg["title_size"]
@@ -54,7 +47,11 @@ class LSEAConfigurationManager(ConfigurationManager):
             self.legend_size = self.cfg["legend_size"]
             self.dpi_setting = self.cfg["dpi_setting"]
 
-            logger.info(f"Image converted and bit depth set for {input_file}")
+            # Initialize image fields to be filled later
+            self.image = None
+            self.bit_depth = None
+            self.cfg.data["bit_depth"] = None
+
         except Exception as e:
             logger.error(f"Failed to initialize LSEAConfigurationManager: {str(e)}")
             raise
@@ -283,7 +280,7 @@ class PlotReportGenerator(ReportManager):
             y_max = config["bit_depth"]
 
             plt.plot(x_positions, line_entropy, label="Line Entropy")
-            plt.plot(x_positions, sliding_window_entropy, label="sliding Window Entropy")
+            plt.plot(x_positions, sliding_window_entropy, label="Sliding Window Entropy")
 
             plt.xlabel("Position", fontsize=config["axis_label_size"])
             plt.ylabel("Entropy", fontsize=config["axis_label_size"])
@@ -390,7 +387,7 @@ class LinearShannonEntropyAnalysisController:
         try:
             self.config_manager.filename = image_path.name
 
-            supported_image_extensions = [".png", ".tif", ".jpg", ".jpeg"]
+            supported_image_extensions = [".png", ".tif", ".tiff", ".jpg", ".jpeg"]
             supported_np_extensions = [".npy"]
 
             if image_path.suffix.lower() in supported_image_extensions:

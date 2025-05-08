@@ -26,16 +26,6 @@ from mipas.config.configuration_manager import ConfigurationManager
 logger = logging.getLogger(__name__)
 
 class SSEAConfigurationManager(ConfigurationManager):
-    """
-    Manages the configuration for segmented Shannon entropy analysis, including validation and segmentation-specific settings.
-
-    Args:
-        config (Dict[str, Any]): User-provided configuration dictionary.
-        input_file (Path): Path to the input image.
-        input_folder (Path): Directory containing the input file.
-        analysis_type (str): Specifies the type of analysis ('Segmented').
-    """
-
     def __init__(self, config: Dict[str, Any], input_file: Path, input_folder: Path, analysis_type: str):
         try:
             config = config.copy()
@@ -44,25 +34,23 @@ class SSEAConfigurationManager(ConfigurationManager):
 
             super().__init__(config, input_file, input_folder, analysis_type)
 
-            # Pull validated values from schema
+            # Just store config values, don't touch I/O
             self.segmentation_number = self.cfg["segmentation_number"]
             self.segmentation_method = self.cfg["segmentation_method"]
             self.segmentation_cbar_text_size = self.cfg["segmentation_cbar_text_size"]
             self.segmentation_vmin = self.cfg["segmentation_vmin"]
-            self.generate_plots = self.cfg["plot"]  # ✅ Fix: ensure this is always available
+            self.generate_plots = self.cfg["plot"]
 
-            # Load and convert image
-            image_converter = ImageConverter(input_file)
-            self.image = image_converter.convert_to_npy()
-            self.bit_depth = image_converter.bit_depth
-            self.segmentation_vmax = self.cfg.get("segmentation_vmax", self.bit_depth)
-
-            logger.info(f"Image loaded for SSEA: {input_file.name} (bit depth: {self.bit_depth})")
+            # Set image and bit depth to None, will be filled later
+            self.image = None
+            self.bit_depth = None
+            self.segmentation_vmax = None
 
         except Exception as e:
             logger.error(f"Failed to initialize SSEAConfigurationManager: {e}")
             raise
-        
+
+
 class ReportManager:
     """Base class for managing different types of report generation.
     
@@ -207,7 +195,7 @@ class CropSegmentCalculator(SegmentCalculator):
                         'data': current_segment
                     })
                 else:
-                    # Log or ignore the dropped segment
+                    # Log dropped segment
                     logger.debug(f"Dropped segment at row {row}, col {col} due to size limitations.")
 
         return grid
@@ -238,7 +226,7 @@ class MergeSegmentCalculator(SegmentCalculator):
         remainder_height = h % segment_size
         remainder_width = w % segment_size
 
-        # Adjust the number of rows and columns if there's a remainder (we'll merge it with the previous row/col)
+        # Adjust the number of rows and columns if there's a remainder
         if remainder_height > 0:
             num_rows -= 1  # Merge the remainder with the second-to-last row
         if remainder_width > 0:
@@ -605,14 +593,9 @@ class PlotReportGenerator(ReportManager):
 
 class SegmentedShannonEntropyAnalysisController:
     def __init__(self, config: Dict[str, Any], input_file: Path, input_folder: Path, analysis_type: str):
-        # Pass analysis_type to SSEAConfigurationManager, which inherits BaseConfigurationManager
         self.config_manager = SSEAConfigurationManager(config, input_file, input_folder, analysis_type)
-
-        # The rest of the setup
         self.segment_calculator = self._select_segment_calculator(self.config_manager.segmentation_method)
         self.entropy_analyzer = EntropyAnalyzer(self.segment_calculator)
-
-        # Setup statistics manager and visualizations (use the output folder from config_manager)
         self.statistics_manager = StatisticsManager(self.config_manager.output_folder)
         self.visualization_manager = PlotReportGenerator(self.config_manager.output_folder)
 
@@ -635,30 +618,43 @@ class SegmentedShannonEntropyAnalysisController:
         
     def run_segmented_analysis(self, image_path: Path, image_folder) -> None:
         """Oversees the full analysis process for a single image."""
-
-        # Step 1: Convert the image to a format ready for analysis
-        self._prepare_image(image_path)
-
-        # Step 2: Analyze the image for different segmentations
-        self._analyze_image()
-
-        # Step 3: Save the results (both visual and textual)
-        self._save_results(image_path, image_folder)
+        self._prepare_image(image_path)  # Step 1: Convert the image to a format ready for analysis
+        self._analyze_image()  # Step 2: Analyze the image for different segmentations
+        self._save_results(image_path, image_folder)  # Step 3: Save the results (both visual and textual)
 
     def _prepare_image(self, image_path: Path) -> None:
-        """Prepares the image for analysis, including loading and converting."""
+        """
+        Prepares the image for analysis by loading and converting it.
+
+        Raises:
+            ValueError: If the file extension is unsupported.
+        """
         self.config_manager.filename = image_path.name
 
-        supported_image_extensions = [".png", ".tif", ".jpg", ".jpeg"]
-        if image_path.suffix.lower() in supported_image_extensions:
-            image_converter = ImageConverter(image_path)
-            self.config_manager.image = image_converter.convert_to_npy()
-            self.config_manager.bit_depth = image_converter.bit_depth
-            self.config_manager.segmentation_vmax = image_converter.bit_depth
+        supported_image_extensions = [".png", ".tif", ".tiff", ".jpg", ".jpeg"]
+        supported_np_extensions = [".npy"]
+
+        ext = image_path.suffix.lower()
+
+        if ext in supported_image_extensions:
+            converter = ImageConverter(image_path)
+            self.config_manager.image = converter.convert_to_npy()
+            self.config_manager.bit_depth = converter.bit_depth
+            self.config_manager.segmentation_vmax = converter.bit_depth
+
+        elif ext in supported_np_extensions:
+            np_array = np.load(image_path)
+            self.config_manager.image = np_array
+            bit_depth = np_array.dtype.itemsize * 8
+            self.config_manager.bit_depth = bit_depth
+            self.config_manager.segmentation_vmax = bit_depth
+
         else:
-            self.config_manager.image = np.load(image_path)
-            self.config_manager.bit_depth = self.config_manager.image.dtype.itemsize * 8
-            self.config_manager.segmentation_vmax = self.config_manager.bit_depth
+            raise ValueError(
+                f"Unsupported file extension: {ext}. Only JPG, PNG, TIFF, or NPY files are supported."
+            )
+
+        logger.info(f"Image prepared for SSEA: {image_path}, bit depth: {self.config_manager.bit_depth}")
 
     def _analyze_image(self) -> None:
         """Performs entropy analysis on the image for different segmentation numbers."""

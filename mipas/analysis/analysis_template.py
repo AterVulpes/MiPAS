@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 # ================ Project-specific Imports ================
 from mipas.logging_config import setup_worker_logger
-from mipas.config.base_configuration_manager import BaseConfigurationManager
+from mipas.config.configuration_manager import ConfigurationManager
 
 # ================ Logger Setup ================
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------
 # Configuration Manager
 # ---------------------------------------------------------------------------------
-class CustomAnalysisConfigurationManager(BaseConfigurationManager):
+class CustomAnalysisConfigurationManager(ConfigurationManager):
     def __init__(self, config: Dict[str, Any], input_file: Path, input_folder: Path, analysis_type: str):
         """
         Manages configuration and initial loading for the custom analysis.

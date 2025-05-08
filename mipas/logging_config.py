@@ -7,7 +7,7 @@ import multiprocessing
 from pathlib import Path
 
 # ============ Shared Queue ============
-log_queue = multiprocessing.Queue(-1)  # Shared between all processes
+log_queue = multiprocessing.Queue(-1)
 
 def setup_main_logger():
     logger = logging.getLogger()
@@ -20,7 +20,7 @@ def setup_main_logger():
     log_dir.mkdir(exist_ok=True)
     log_file_path = log_dir / "mipas_analysis.log"
 
-    # Console and file handlers (no QueueHandler)
+    # Console and file handlers
     console_handler = logging.StreamHandler()
     file_handler = logging.FileHandler(log_file_path)
 
